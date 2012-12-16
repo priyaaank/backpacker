@@ -29,7 +29,10 @@ class MessageQueue
   private 
 
   def visible_messages
-    messages.where(:visible => true)
+    visibility_time_out_gap = Time.now - Message::VISIBILITY_TIMEOUT_IN_SECONDS
+    messages.any_of({:visible => true},
+                    {:recieved_at.lte => visibility_time_out_gap}
+                   )
   end
   
 end

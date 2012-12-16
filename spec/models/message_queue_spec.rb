@@ -43,6 +43,7 @@ describe MessageQueue do
   context "operations" do
 
     let(:queue) { MessageQueue.url }
+    let(:one_second) { 1 }
 
     before do
       lonely_planet = {:body => "Hola!", :url => "http://lonelyplanet.com"}.to_json
@@ -60,6 +61,14 @@ describe MessageQueue do
       @message_two.update_attributes(:visible => false)
 
       queue.size.should eq 1
+    end
+
+    it "should include invisible messages that have crossed visibility timeout, in size" do
+      queue.recieve
+
+      Timecop.travel(Time.now + Message::VISIBILITY_TIMEOUT_IN_SECONDS + one_second) do
+        queue.size.should eq 2
+      end
     end
 
     context "recieve" do
@@ -96,6 +105,29 @@ describe MessageQueue do
         retry_counts = queue.size.times.collect { queue.recieve.retry_count }
         retry_counts.should include(1,3)
       end
+
+      it "should pick invisible messages too after visibility timeout period" do
+        message = queue.recieve
+
+        Timecop.travel(Time.now + Message::VISIBILITY_TIMEOUT_IN_SECONDS + one_second) do
+          messages = queue.size.times.collect do
+            queue.recieve
+          end
+          messages.should include(message)
+        end
+      end
+
+      it "should not pick invisible message if visibility timeout is not crossed" do
+        message = queue.recieve
+
+        Timecop.travel(Time.now + Message::VISIBILITY_TIMEOUT_IN_SECONDS - one_second) do
+          messages = queue.size.times.collect do
+            queue.recieve
+          end
+          messages.should_not include(message)
+        end
+      end
+
 
     end
 
