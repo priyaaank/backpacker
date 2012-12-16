@@ -82,13 +82,19 @@ describe MessageQueue do
         message.recieved_at.should eq Time.new(2022, 12, 12, 10, 5, 0)
       end
 
-
       it "should not return an invisible message" do
         @message_one.update_attributes(:visible => false)
 
         queue.size.times do
           queue.recieve.id.should_not eq @message_one.id
         end
+      end
+
+      it "should increment retry count by one" do
+        @message_one.update_attributes(:retry_count => 2)
+
+        retry_counts = queue.size.times.collect { queue.recieve.retry_count }
+        retry_counts.should include(1,3)
       end
 
     end
