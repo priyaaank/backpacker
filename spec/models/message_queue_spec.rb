@@ -128,6 +128,17 @@ describe MessageQueue do
         end
       end
 
+    end
+
+    context "delete" do
+
+      it "should remove the message from the queue" do
+        queue.recieve.delete
+
+        Timecop.travel(2022, 12, 12, 10, 5, 0) do
+          queue.size.should eq 1
+        end
+      end
 
     end
 
