@@ -23,6 +23,10 @@ class MessageQueue
     msg_to_return
   end
 
+  def send_message message
+    messages << message
+  end
+
   private 
 
   def update_message_before_returning message

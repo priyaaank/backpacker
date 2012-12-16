@@ -148,6 +148,18 @@ describe MessageQueue do
 
     end
 
+    context "send message" do
+
+      it "should add message to the existing queue" do
+        message_body = {:body => "some awesome message", :url => "http://trippy.com"}
+        message = Message.new(:text => message_body)
+        queue.send_message message
+
+        queue.size.should eq 3
+      end
+
+    end
+
   end
 
 end
