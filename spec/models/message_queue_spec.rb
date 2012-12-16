@@ -80,6 +80,12 @@ describe MessageQueue do
         message.visible.should be_false
       end
 
+      it "should return nil if queue is empty" do
+        2.times { queue.recieve }
+
+        queue.recieve.should be_nil
+      end
+
       it "should update the recieved at timestamp" do
         message = nil
         Timecop.freeze(2022, 12, 12, 10, 5, 0) do
